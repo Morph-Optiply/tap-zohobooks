@@ -198,7 +198,7 @@ class ChartOfAccountsStream(ZohoBooksStream):
         th.Property("has_attachment", th.BooleanType),
         th.Property("is_child_present", th.BooleanType),
         th.Property("child_count", th.StringType),
-        th.Property("documents", th.ArrayType(th.StringType)),
+        th.Property("documents", th.ArrayType(th.CustomType({"type": ["object", "string"]}))),
         th.Property("created_time", th.DateTimeType),
         th.Property("last_modified_time", th.DateTimeType),
     ).to_dict()
