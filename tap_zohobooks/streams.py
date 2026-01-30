@@ -70,16 +70,6 @@ class JournalsIdStream(ZohoBooksStream):
             "organization_id": context.get("organization_id"),
             "journal_id": record["journal_id"],
         }
-    
-    def get_url_params(self, context, next_page_token) -> Dict[str, Any]:
-        params = super().get_url_params(context, next_page_token)
-        # remove last_modified_time from params, as it's returning journals with date equal to last_modified_time instead of greater than it
-        start_date = params.pop("last_modified_time", None)
-        if start_date:
-            # use only the date part of start_date from config
-            params["date_after"] = start_date.split("T")[0]
-        return params
-
 
 
 class JournalStream(ZohoBooksStream):
