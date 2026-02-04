@@ -35,6 +35,7 @@ class ZohoBooksStream(RESTStream):
 
     rate_limit_alert = False
     backoff_max_tries = 5
+    ignore_config_start_date = False
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:
         return backoff.expo(base=2, factor=5, max_value=60)
@@ -92,7 +93,7 @@ class ZohoBooksStream(RESTStream):
 
     @cached
     def get_starting_time(self, context):
-        if self.config.get("start_date"):
+        if self.config.get("start_date") and not self.ignore_config_start_date:
             start_date = self.config["start_date"]
         else:
             start_date = None
@@ -156,7 +157,7 @@ class ZohoBooksStream(RESTStream):
         if next_page_token:
             params["page"] = next_page_token
 
-        rep_key_value = self.get_starting_time(context) if self.replication_key else None
+        rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None and not self.config.get(f"full_sync_{self.name}"):
             start_date = self._infer_date(rep_key_value)
             start_date = start_date + timedelta(seconds=1)

@@ -169,6 +169,7 @@ class ChartOfAccountsStream(ZohoBooksStream):
     primary_keys = ["account_id"]
     records_jsonpath: str = "$.chartofaccounts[*]"
     parent_stream_type = OrganizationIdStream
+    ignore_config_start_date = True
 
     schema = th.PropertiesList(
         th.Property("account_id", th.StringType),
