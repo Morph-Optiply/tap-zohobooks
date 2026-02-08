@@ -4,7 +4,7 @@ import requests
 
 from collections import OrderedDict
 
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 from requests.models import Response as Response
 
 from singer_sdk import typing as th  # JSON Schema typing helpers

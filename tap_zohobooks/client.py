@@ -6,9 +6,8 @@ from typing import Any, Dict, Optional, Iterable, Generator
 import backoff
 from memoization import cached
 from datetime import datetime, timedelta
-from requests import Response, Response as Response
+from requests import Response
 from singer_sdk.streams import RESTStream
-from datetime import datetime
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.pagination import BaseAPIPaginator
 from time import sleep
