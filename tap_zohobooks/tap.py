@@ -38,6 +38,12 @@ from tap_zohobooks.streams import (
     ReportAgingDetailStream,
     ReportAgingSummaryStream,
     CurrencyStream,
+    VendorPaymentsStream,
+    BankTransactionsStream,
+    BankAccountsStream,
+    VendorCreditsStream,
+    ChartOfAccountsAliasStream,
+    ExchangeRatesStream,
 )
 
 STREAM_TYPES = [
@@ -73,6 +79,12 @@ STREAM_TYPES = [
     ReportAgingDetailStream,
     ReportAgingSummaryStream,
     CurrencyStream,
+    VendorPaymentsStream,
+    BankTransactionsStream,
+    BankAccountsStream,
+    VendorCreditsStream,
+    ChartOfAccountsAliasStream,
+    ExchangeRatesStream,
 ]
 
 
@@ -89,7 +101,7 @@ class TapZohoBooks(Tap):
         parse_env_config=False,
         validate_config=True,
     ) -> None:
-        self.config_file = config[0]
+        self.config_file = config[0] if isinstance(config, list) and config else None
         super().__init__(config, catalog, state, parse_env_config, validate_config)
 
     config_jsonschema = th.PropertiesList(
