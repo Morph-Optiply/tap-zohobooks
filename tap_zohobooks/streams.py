@@ -210,6 +210,12 @@ class ChartOfAccountsStream(ZohoBooksStream):
         }
 
 
+class ChartOfAccountsAliasStream(ChartOfAccountsStream):
+    """Zoho endpoint-name alias for chart of accounts."""
+
+    name = "chartofaccounts"
+
+
 class ItemsStream(ZohoBooksStream):
     name = "items"
     path = "/items"
@@ -1593,7 +1599,7 @@ class PurchaseOrderDetailsStream(ZohoBooksStream):
 class VendorsStream(ZohoBooksStream):
     name = "vendors"
     path = "/vendors"
-    primary_keys = ["purchaseorder_id"]
+    primary_keys = ["contact_id"]
     replication_key = "last_modified_time"
     records_jsonpath: str = "$.contacts[*]"
     parent_stream_type = OrganizationIdStream
@@ -2037,6 +2043,96 @@ class ExpensesDetailsStream(ZohoBooksStream):
     ).to_dict()
 
 
+class VendorPaymentsStream(ZohoBooksStream):
+    name = "vendorpayments"
+    path = "/vendorpayments"
+    primary_keys = ["payment_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.vendorpayments[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("payment_id", th.StringType),
+        th.Property("vendor_id", th.StringType),
+        th.Property("vendor_name", th.StringType),
+        th.Property("payment_number", th.StringType),
+        th.Property("date", th.DateTimeType),
+        th.Property("payment_mode", th.StringType),
+        th.Property("paid_through_account_id", th.StringType),
+        th.Property("paid_through_account_name", th.StringType),
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("amount", th.NumberType),
+        th.Property("bcy_amount", th.NumberType),
+        th.Property("unused_amount", th.NumberType),
+        th.Property("description", th.StringType),
+        th.Property("reference_number", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
+        th.Property("bills", th.CustomType({"type": ["array", "string"]})),
+        th.Property("documents", th.CustomType({"type": ["array", "string"]})),
+        th.Property("custom_fields", th.CustomType({"type": ["array", "string"]})),
+    ).to_dict()
+
+
+class BankTransactionsStream(ZohoBooksStream):
+    name = "banktransactions"
+    path = "/banktransactions"
+    primary_keys = ["transaction_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.banktransactions[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("transaction_id", th.StringType),
+        th.Property("bank_account_id", th.StringType),
+        th.Property("account_id", th.StringType),
+        th.Property("account_name", th.StringType),
+        th.Property("transaction_type", th.StringType),
+        th.Property("transaction_type_formatted", th.StringType),
+        th.Property("date", th.DateTimeType),
+        th.Property("debit_or_credit", th.StringType),
+        th.Property("amount", th.NumberType),
+        th.Property("bcy_amount", th.NumberType),
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("payee", th.StringType),
+        th.Property("description", th.StringType),
+        th.Property("reference_number", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("is_categorized", th.BooleanType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
+    ).to_dict()
+
+
+class BankAccountsStream(ZohoBooksStream):
+    name = "bankaccounts"
+    path = "/bankaccounts"
+    primary_keys = ["account_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.bankaccounts[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("account_id", th.StringType),
+        th.Property("account_name", th.StringType),
+        th.Property("bank_name", th.StringType),
+        th.Property("account_number", th.StringType),
+        th.Property("account_type", th.StringType),
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("current_balance", th.NumberType),
+        th.Property("bcy_current_balance", th.NumberType),
+        th.Property("is_active", th.BooleanType),
+        th.Property("is_primary_account", th.BooleanType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
+    ).to_dict()
+
+
 class CreditNotesIDStream(ZohoBooksStream):
     name = "credit_notes_id"
     path = "/creditnotes"
@@ -2120,6 +2216,12 @@ class VendorCreditIDSStream(ZohoBooksStream):
             "vendor_credit_id": record["vendor_credit_id"],
             "organization_id": context.get("organization_id"),
         }
+
+
+class VendorCreditsStream(VendorCreditIDSStream):
+    """Zoho endpoint-name alias for vendor credits."""
+
+    name = "vendorcredits"
 
 
 class VendorCreditDetailsStream(ZohoBooksStream):
@@ -2296,6 +2398,7 @@ class CurrencyStream(ZohoBooksStream):
     replication_key = None
     primary_keys = ["currency_id"]
     records_jsonpath: str = "$.currencies[*]"
+    parent_stream_type = OrganizationIdStream
 
     schema = th.PropertiesList(
         th.Property("currency_id", th.StringType),
@@ -2309,3 +2412,32 @@ class CurrencyStream(ZohoBooksStream):
         th.Property("exchange_rate", th.NumberType),
         th.Property("effective_date", th.DateTimeType),
     ).to_dict()
+
+    def get_child_context(self, record, context) -> dict:
+        return {
+            "currency_id": record["currency_id"],
+            "organization_id": context.get("organization_id"),
+        }
+
+
+class ExchangeRatesStream(ZohoBooksStream):
+    name = "exchangerates"
+    path = "/settings/currencies/{currency_id}/exchangerates"
+    replication_key = None
+    primary_keys = ["effective_date", "currency_id"]
+    records_jsonpath: str = "$.exchange_rates[*]"
+    parent_stream_type = CurrencyStream
+
+    schema = th.PropertiesList(
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("currency_name", th.StringType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("effective_date", th.DateTimeType),
+    ).to_dict()
+
+    def post_process(self, record, context):
+        record = super().post_process(record, context)
+        if record and context is not None:
+            record.setdefault("currency_id", context.get("currency_id"))
+        return record
