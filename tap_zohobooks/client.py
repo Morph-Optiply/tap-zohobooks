@@ -1,6 +1,7 @@
 """REST client handling, including ZohoBooksStream base class."""
 
 from backports.cached_property import cached_property
+import copy
 import requests
 from typing import Any, Dict, Optional, Iterable, Generator
 import backoff
@@ -265,6 +266,16 @@ class ZohoBooksStream(RESTStream):
 
     def parse_response(self, response: Response) -> Iterable[dict]:
         return super().parse_response(response)
+
+    def _write_record_message(self, record: dict) -> None:
+        """Write a RECORD without mutating the record used for state.
+
+        Singer SDK record generation strips deselected catalog properties in
+        place. HotGlue field maps can deselect replication keys, but the SDK
+        still increments state from the same record after writing. Use a copy
+        for output so the original bookmark fields remain available for state.
+        """
+        return super()._write_record_message(copy.deepcopy(record))
 
     def _get_replication_key_fallback(self, row: dict, context=None):
         """Return a safe bookmark fallback for Zoho rows missing the stream RK.
