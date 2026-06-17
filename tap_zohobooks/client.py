@@ -266,7 +266,35 @@ class ZohoBooksStream(RESTStream):
     def parse_response(self, response: Response) -> Iterable[dict]:
         return super().parse_response(response)
 
+    def _get_replication_key_fallback(self, row: dict, context=None):
+        """Return a safe bookmark fallback for Zoho rows missing the stream RK.
+
+        Some Zoho Books endpoints omit ``last_modified_time`` from detail or
+        account-style responses even when their parent/list endpoint is
+        incremental. The Singer SDK requires the configured replication key to
+        be present on every emitted record before it can advance state.
+        """
+        if context:
+            for key in (self.replication_key, "parent_last_modified_time", "last_modified_time"):
+                if key and context.get(key):
+                    return context[key]
+
+        for key in (
+            "updated_time",
+            "last_modified_time",
+            "created_time",
+            "date",
+            "effective_date",
+        ):
+            if row.get(key):
+                return row[key]
+
     def post_process(self, row: dict, context=None):
+        if self.replication_key and self.replication_key not in row:
+            fallback = self._get_replication_key_fallback(row, context)
+            if fallback is not None:
+                row[self.replication_key] = fallback
+
         for key, value in row.items():
             field_types = self.schema.get("properties", {}).get(key, {}).get("type")
             if not field_types:
