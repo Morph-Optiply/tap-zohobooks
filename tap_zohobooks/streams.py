@@ -2113,7 +2113,7 @@ class BankAccountsStream(ZohoBooksStream):
     name = "bankaccounts"
     path = "/bankaccounts"
     primary_keys = ["account_id"]
-    replication_key = "last_modified_time"
+    replication_key = None
     records_jsonpath: str = "$.bankaccounts[*]"
     parent_stream_type = OrganizationIdStream
 
