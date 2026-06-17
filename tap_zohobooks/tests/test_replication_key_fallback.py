@@ -2,7 +2,7 @@
 
 import datetime
 
-from tap_zohobooks.streams import BankAccountsStream, ExpensesDetailsStream
+from tap_zohobooks.streams import BankAccountsStream, ExpensesDetailsStream, VendorPaymentsStream
 from tap_zohobooks.tap import TapZohoBooks
 
 
@@ -19,16 +19,21 @@ def _tap():
 
 
 def test_post_process_fills_missing_last_modified_time_from_created_time():
-    stream = BankAccountsStream(tap=_tap())
+    stream = VendorPaymentsStream(tap=_tap())
     row = {
-        "account_id": "bank-1",
-        "account_name": "Main bank",
+        "payment_id": "payment-1",
         "created_time": "2026-06-17T05:00:00+0000",
     }
 
     processed = stream.post_process(row, context={"organization_id": "org-1"})
 
     assert processed["last_modified_time"] == "2026-06-17T05:00:00+0000"
+
+
+def test_bankaccounts_is_full_table_because_zoho_omits_bookmark():
+    stream = BankAccountsStream(tap=_tap())
+
+    assert stream.replication_key is None
 
 
 def test_child_post_process_fills_missing_last_modified_time_from_parent_context():
