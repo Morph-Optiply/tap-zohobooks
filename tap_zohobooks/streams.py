@@ -1934,6 +1934,7 @@ class ExpensesStream(ZohoBooksStream):
         return {
             "expense_id": record["expense_id"],
             "organization_id": context.get("organization_id"),
+            "parent_last_modified_time": record.get("last_modified_time"),
         }
 
 
@@ -2215,6 +2216,7 @@ class VendorCreditIDSStream(ZohoBooksStream):
         return {
             "vendor_credit_id": record["vendor_credit_id"],
             "organization_id": context.get("organization_id"),
+            "parent_last_modified_time": record.get("last_modified_time"),
         }
 
 
