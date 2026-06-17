@@ -2438,6 +2438,14 @@ class ExchangeRatesStream(ZohoBooksStream):
         th.Property("effective_date", th.DateTimeType),
     ).to_dict()
 
+    def validate_response(self, response: requests.Response) -> None:
+        if response.status_code == 400:
+            self.logger.warning(
+                "Skipping exchange rates for currency context after Zoho returned 400."
+            )
+            return None
+        return super().validate_response(response)
+
     def post_process(self, record, context):
         record = super().post_process(record, context)
         if record and context is not None:
