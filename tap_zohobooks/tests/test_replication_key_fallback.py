@@ -39,6 +39,15 @@ def test_bankaccounts_is_full_table_because_zoho_omits_bookmark():
     assert stream.replication_key is None
 
 
+def test_bankaccounts_schema_includes_live_balance_fields():
+    stream = BankAccountsStream(tap=_tap())
+
+    properties = stream.schema["properties"]
+    assert "balance" in properties
+    assert "bank_balance" in properties
+    assert "bcy_balance" in properties
+
+
 def test_child_post_process_fills_missing_last_modified_time_from_parent_context():
     stream = ExpensesDetailsStream(tap=_tap())
     row = {
